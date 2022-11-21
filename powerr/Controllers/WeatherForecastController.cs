@@ -19,7 +19,7 @@ namespace powerr.Controllers
             _logger = logger;
         }
 
-        [Authorize]
+        [Authorize(Roles ="Customer")]
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
