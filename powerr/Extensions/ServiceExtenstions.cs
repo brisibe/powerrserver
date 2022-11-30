@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using powerr.Api.Models.Entities.User;
 using powerr.Api.repository;
+using powerr.Interfaces;
+using powerr.repository;
 using System.Text;
 
 namespace powerr.Extensions
@@ -15,10 +17,19 @@ namespace powerr.Extensions
         //cors
         public static void ConfigureCors(this IServiceCollection services)
         {
-            services.AddCors(options => options.AddPolicy(name: "power_cors_policy", policy => policy.WithOrigins("http://localhost:3000", "localhost:3000")
+            services.AddCors(options => options.AddPolicy(name: "power_cors_policy", policy => policy.AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader()
             ));
+        }
+
+        //RepositoryManager
+        public static void ConfigureRepository(this IServiceCollection services)
+        {
+            services.AddScoped<IMeterRequestRepository, MeterRequestRepository>();
+            services.AddScoped<IMeterRepository, MeterRepository>();
+            services.AddScoped<IWalletRepository, WalletRepository>();
+            services.AddScoped<IRechargeTokenRepository, RechargeTokenRepository>();
         }
 
         //dbcontext 

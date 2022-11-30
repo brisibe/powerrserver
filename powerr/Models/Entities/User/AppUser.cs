@@ -1,6 +1,8 @@
 ﻿
 
 using Microsoft.AspNetCore.Identity;
+using powerr.Models.Entities.Meter;
+using powerr.Models.Entities.Wallet;
 
 namespace powerr.Api.Models.Entities.User
 {
@@ -10,6 +12,7 @@ namespace powerr.Api.Models.Entities.User
         public string LastName { get; set; }
 
 
-        
+       public virtual ICollection<MeterRequest> MeterRequest { get; set; }
+       
     }
 }

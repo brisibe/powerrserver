@@ -12,8 +12,8 @@ using powerr.Api.repository;
 namespace powerr.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20221121191837_initial_identity")]
-    partial class initial_identity
+    [Migration("20221128131304_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -53,15 +53,15 @@ namespace powerr.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "86f9e0a0-80c5-478d-b697-31661fb07b3d",
-                            ConcurrencyStamp = "9c0ce637-c7a3-4c27-a8d0-b2531aa686f8",
+                            Id = "e39a5e1c-79cf-455f-8aef-7486ef889b16",
+                            ConcurrencyStamp = "9f56193e-5e9f-4aa0-8a20-f2b902fede3b",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "d39d4c7a-0512-4016-b9f1-5c42e02eaf9b",
-                            ConcurrencyStamp = "fb916668-6638-4979-935f-fc0d2c6d9d56",
+                            Id = "d96501da-ead2-4ce9-b7f3-c3ee5d619399",
+                            ConcurrencyStamp = "433d58b4-0e6c-4412-938b-a6e0f57497a4",
                             Name = "Customer",
                             NormalizedName = "CUSTOMER"
                         });
@@ -246,6 +246,127 @@ namespace powerr.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("powerr.Models.Entities.Meter.Meter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("AvailableUnit")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DiscoName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("MeterNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("MeterRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MeterRequestId");
+
+                    b.ToTable("meters");
+                });
+
+            modelBuilder.Entity("powerr.Models.Entities.Meter.MeterRequest", b =>
+                {
+                    b.Property<int>("MeterRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MeterRequestId"), 1L, 1);
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LGA")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("MeterRequestId");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("meterRequests");
+                });
+
+            modelBuilder.Entity("powerr.Models.Entities.MeterToken.RechargeToken", b =>
+                {
+                    b.Property<int>("RechargeTokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RechargeTokenId"), 1L, 1);
+
+                    b.Property<bool>("HasBeenUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("Token")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.HasKey("RechargeTokenId");
+
+                    b.ToTable("rechargeTokens");
+                });
+
+            modelBuilder.Entity("powerr.Models.Entities.Wallet.Wallet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("wallets");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -295,6 +416,30 @@ namespace powerr.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("powerr.Models.Entities.Meter.Meter", b =>
+                {
+                    b.HasOne("powerr.Models.Entities.Meter.MeterRequest", null)
+                        .WithMany("Meters")
+                        .HasForeignKey("MeterRequestId");
+                });
+
+            modelBuilder.Entity("powerr.Models.Entities.Meter.MeterRequest", b =>
+                {
+                    b.HasOne("powerr.Api.Models.Entities.User.AppUser", null)
+                        .WithMany("MeterRequest")
+                        .HasForeignKey("AppUserId");
+                });
+
+            modelBuilder.Entity("powerr.Api.Models.Entities.User.AppUser", b =>
+                {
+                    b.Navigation("MeterRequest");
+                });
+
+            modelBuilder.Entity("powerr.Models.Entities.Meter.MeterRequest", b =>
+                {
+                    b.Navigation("Meters");
                 });
 #pragma warning restore 612, 618
         }

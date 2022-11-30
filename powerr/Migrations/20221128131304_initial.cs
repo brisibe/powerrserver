@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace powerr.Migrations
 {
-    public partial class initial_identity : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -48,6 +48,35 @@ namespace powerr.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "rechargeTokens",
+                columns: table => new
+                {
+                    RechargeTokenId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Token = table.Column<long>(type: "bigint", nullable: false),
+                    Value = table.Column<int>(type: "int", nullable: false),
+                    HasBeenUsed = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_rechargeTokens", x => x.RechargeTokenId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "wallets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_wallets", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,15 +185,64 @@ namespace powerr.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "86f9e0a0-80c5-478d-b697-31661fb07b3d", "9c0ce637-c7a3-4c27-a8d0-b2531aa686f8", "Admin", "ADMIN" });
+            migrationBuilder.CreateTable(
+                name: "meterRequests",
+                columns: table => new
+                {
+                    MeterRequestId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RequestedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LGA = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
+                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_meterRequests", x => x.MeterRequestId);
+                    table.ForeignKey(
+                        name: "FK_meterRequests_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "meters",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MeterNumber = table.Column<long>(type: "bigint", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AvailableUnit = table.Column<int>(type: "int", nullable: false),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
+                    DiscoName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MeterRequestId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_meters", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_meters_meterRequests_MeterRequestId",
+                        column: x => x.MeterRequestId,
+                        principalTable: "meterRequests",
+                        principalColumn: "MeterRequestId");
+                });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "d39d4c7a-0512-4016-b9f1-5c42e02eaf9b", "fb916668-6638-4979-935f-fc0d2c6d9d56", "Customer", "CUSTOMER" });
+                values: new object[] { "d96501da-ead2-4ce9-b7f3-c3ee5d619399", "433d58b4-0e6c-4412-938b-a6e0f57497a4", "Customer", "CUSTOMER" });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[] { "e39a5e1c-79cf-455f-8aef-7486ef889b16", "9f56193e-5e9f-4aa0-8a20-f2b902fede3b", "Admin", "ADMIN" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -204,6 +282,16 @@ namespace powerr.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_meterRequests_AppUserId",
+                table: "meterRequests",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_meters_MeterRequestId",
+                table: "meters",
+                column: "MeterRequestId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -224,7 +312,19 @@ namespace powerr.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "meters");
+
+            migrationBuilder.DropTable(
+                name: "rechargeTokens");
+
+            migrationBuilder.DropTable(
+                name: "wallets");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "meterRequests");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

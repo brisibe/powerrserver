@@ -19,6 +19,8 @@ builder.Services.ConfigureDbContext(connectionString);
 builder.Services.ConfigureJwtAuthentication(configuration);
 builder.Services.ConfigureIdentity();
 
+builder.Services.ConfigureRepository();
+
 //enable cors
 var app = builder.Build();
 
@@ -29,11 +31,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
 app.UseCors("power_cors_policy");
+
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 
