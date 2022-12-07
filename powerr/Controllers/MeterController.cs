@@ -352,6 +352,41 @@ namespace powerr.Controllers
 
         }
 
+        [Route("load")]
+        public async Task<IActionResult> Load(LoadDto load)
+        {
+            
+
+            var meter = await _meterRepository.FindByConditionAsync(m => m.Id == load.meterId);
+
+            if(meter != null)
+            {
+                if(meter.AvailableUnit <= load.unit )
+                {
+                    meter.AvailableUnit = 0;
+                    meter.Status = ((int)MeterStatusEnum.DISCONNECTED);
+
+                    _meterRepository.Update(meter);
+                    _meterRepository.Save();
+
+                    return StatusCode(StatusCodes.Status201Created, new { statusCode = 201, message = "You have run out of units." });
+                }
+
+
+                meter.AvailableUnit = meter.AvailableUnit - load.unit;
+
+                _meterRepository.Update(meter);
+                _meterRepository.Save();
+
+                return Ok();
+
+            }
+            return BadRequest(new { status = 400, message = "something went wrong" }) ;
+
+
+
+
+        }
        
     }
 }

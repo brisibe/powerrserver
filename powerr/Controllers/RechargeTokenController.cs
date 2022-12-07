@@ -34,15 +34,20 @@ namespace powerr.Controllers
                 Random random = new Random();
 
                 var wallet = await _walletRepository.FindByConditionAsync(m => m.Id == dto.WalletId);
+                var unitForAmount = dto.Value == 200 ? 20 : dto.Value == 500 ? 50 : dto.Value == 100 ? 120 : 0;
 
-                if(wallet != null)
+                if (wallet != null)
                 {
+                    if(wallet.Balance < dto.Value)
+                    {
+                        return StatusCode(StatusCodes.Status400BadRequest, new { statusCode = 400, message = "Insufficient Balance" });
+                    }
 
                     var rechargeObj = new RechargeToken
                     {
                         Token = random.Next(1000000, 8000000),
                         HasBeenUsed = false,
-                        Value = dto.Value,
+                        Value = unitForAmount
                     };
 
                      _rechargeTokenRepository.Create(rechargeObj);
